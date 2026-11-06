@@ -3,7 +3,7 @@
 -- DHBAIXA. PROVISAO = 'S' e previsao (pedido, nota nao confirmada): mostrar a parte, porque provisao vencida nao
 -- some sozinha. Valor do titulo = VLRDESDOB.
 -- Ajustar na empresa: naturezas que nao sao divida de verdade (transferencias, adiantamentos) e as empresas do grupo.
--- Campos conferidos no dicionario de uma base 4.36 (nov/2026). Rode na sua base (consultar_sql, base teste) antes de usar.
+-- Validada numa base 4.36 (nov/2026). Rode na sua base (consultar_sql, base teste) antes de usar.
 SELECT CASE f.RECDESP WHEN -1 THEN 'PAGAR' ELSE 'RECEBER' END AS TIPO,
        f.PROVISAO,
        CASE WHEN f.DTVENC >= TRUNC(SYSDATE) THEN '1 A VENCER'

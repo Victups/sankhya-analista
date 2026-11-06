@@ -4,7 +4,7 @@
 -- (RECDESP 1 entrada, -1 saida). SALDOBCO e so o conciliado: sem conciliacao em dia, fica parado.
 -- A TGFMBC nao tem empresa: ela vem da conta (TSICTA.CODEMP).
 -- Ajustar na empresa: conferir com o extrato de uma conta antes de usar em painel.
--- Campos conferidos no dicionario de uma base 4.36 (nov/2026). Rode na sua base (consultar_sql, base teste) antes de usar.
+-- Validada numa base 4.36 (nov/2026). Rode na sua base (consultar_sql, base teste) antes de usar.
 WITH ultima AS (
   SELECT s.CODCTABCOINT, s.REFERENCIA, s.SALDOREAL,
          ROW_NUMBER() OVER (PARTITION BY s.CODCTABCOINT ORDER BY s.REFERENCIA DESC) AS N

@@ -4,7 +4,7 @@
 -- tabela e campo adicional TDDTAB/TDDCAM (ADICIONAL = 'S'). Objeto invalido e trigger desabilitada vem do Oracle:
 -- com usuario so de leitura, trocar USER_OBJECTS/USER_TRIGGERS por ALL_* com OWNER = dono das tabelas.
 -- Use antes e depois de atualizar o Sankhya: o que ficou invalido ou desligado precisa de teste.
--- Campos conferidos no dicionario de uma base 4.36 (nov/2026). Rode na sua base (consultar_sql, base teste) antes de usar.
+-- Validada numa base 4.36 (nov/2026). Rode na sua base (consultar_sql, base teste) antes de usar.
 SELECT 'BOTAO DE ACAO' AS TIPO, COUNT(*) AS QTD FROM TSIBTA
 UNION ALL SELECT 'EVENTO PROGRAMAVEL ATIVO', COUNT(*) FROM TSIEVP WHERE ATIVO = 'S'
 UNION ALL SELECT 'ACAO AGENDADA ATIVA', COUNT(*) FROM TSIAAG WHERE ATIVO = 'S'

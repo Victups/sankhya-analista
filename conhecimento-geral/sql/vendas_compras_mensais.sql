@@ -6,7 +6,7 @@
 -- retencoes fora da mercadoria.
 -- Ajustar na empresa: TOPs proprias que nao sao venda/compra de verdade (anotar em conhecimento/) e a data
 -- (DTNEG = negociacao; DTFATUR ou DTENTSAI se a empresa fecha pelo faturamento ou pela entrada).
--- Campos conferidos no dicionario de uma base 4.36 (nov/2026). Rode na sua base (consultar_sql, base teste) antes de usar.
+-- Validada numa base 4.36 (nov/2026). Rode na sua base (consultar_sql, base teste) antes de usar.
 WITH periodo AS (SELECT DATE '2026-01-01' AS INI, DATE '2027-01-01' AS FIM FROM DUAL)
 SELECT c.CODEMP,
        TRUNC(c.DTNEG, 'MM') AS MES,

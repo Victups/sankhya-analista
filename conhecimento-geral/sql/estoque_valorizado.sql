@@ -4,7 +4,7 @@
 -- CUSSEMICM = custo medio sem ICMS, base do valor do estoque. Saldo negativo existe (saida antes da entrada):
 -- fica contado a parte e fora do valor.
 -- Ajustar na empresa: locais que nao sao estoque de verdade (terceiros, consignado) e produtos de servico.
--- Campos conferidos no dicionario de uma base 4.36 (nov/2026). Rode na sua base (consultar_sql, base teste) antes de usar.
+-- Validada numa base 4.36 (nov/2026). Rode na sua base (consultar_sql, base teste) antes de usar.
 WITH custo AS (
   SELECT u.CODEMP, u.CODPROD, u.CUSSEMICM,
          ROW_NUMBER() OVER (PARTITION BY u.CODEMP, u.CODPROD ORDER BY u.DTATUAL DESC) AS N
