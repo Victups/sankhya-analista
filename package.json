@@ -1,12 +1,14 @@
 {
   "name": "sankhya-analista",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "description": "Dependencias dos servidores MCP do plugin sankhya-analista",
   "type": "module",
-  "engines": { "node": ">=18" },
+  "engines": {
+    "node": ">=18"
+  },
   "scripts": {
-    "teste": "node mcp/oracle.mjs --teste && node mcp/ajuda.mjs --teste && node hooks/travas.mjs --teste && node hooks/travas.mjs texto conhecimento-geral"
+    "teste": "node mcp/oracle.mjs --teste && node mcp/ajuda.mjs --teste && node mcp/teste-protocolo.mjs && node hooks/travas.mjs --teste && node hooks/travas.mjs texto conhecimento-geral"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.32.1",

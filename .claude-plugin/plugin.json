@@ -1,6 +1,6 @@
 {
   "name": "sankhya-analista",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Analista desenvolvedor Sankhya: consulta o Oracle só para leitura, mapeia o dicionário e as ligações do banco, busca na Central de Ajuda e guarda o que aprende no repositório da empresa.",
   "author": { "name": "victor pereira" },
   "keywords": ["sankhya", "oracle", "erp", "sql", "dicionario"],
