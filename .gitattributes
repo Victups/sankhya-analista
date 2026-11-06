@@ -1,0 +1,4 @@
+# Fim de linha LF no repositório (o Windows converte na cópia local)
+* text=auto eol=lf
+*.png binary
+*.zip binary
