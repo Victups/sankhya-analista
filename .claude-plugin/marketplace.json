@@ -1,0 +1,14 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "sankhya-analista",
+  "description": "Plugin do analista desenvolvedor Sankhya",
+  "owner": { "name": "victor pereira" },
+  "plugins": [
+    {
+      "name": "sankhya-analista",
+      "description": "Analista desenvolvedor Sankhya: banco só leitura, dicionário e grafo, Central de Ajuda e conhecimento da empresa.",
+      "source": "./",
+      "category": "productivity"
+    }
+  ]
+}

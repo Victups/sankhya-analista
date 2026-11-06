@@ -1,0 +1,99 @@
+{
+  "name": "sankhya-analista",
+  "version": "0.1.0",
+  "description": "Analista desenvolvedor Sankhya: consulta o Oracle só para leitura, mapeia o dicionário e as ligações do banco, busca na Central de Ajuda e guarda o que aprende no repositório da empresa.",
+  "author": { "name": "victor pereira" },
+  "keywords": ["sankhya", "oracle", "erp", "sql", "dicionario"],
+  "userConfig": {
+    "oracle_connect_string": {
+      "type": "string",
+      "title": "Banco de produção (host:porta/serviço)",
+      "description": "Endereço do Oracle do Sankhya. Vazio: usa a variável de ambiente ORACLE_CONNECT_STRING."
+    },
+    "oracle_user": {
+      "type": "string",
+      "title": "Usuário do banco de produção",
+      "description": "De preferência um usuário só de leitura. Vazio: usa ORACLE_USER."
+    },
+    "oracle_password": {
+      "type": "string",
+      "title": "Senha do banco de produção",
+      "description": "Guardada no cofre de credenciais do Claude Code, nunca no repositório. Vazio: usa ORACLE_PASSWORD.",
+      "sensitive": true
+    },
+    "oracle_schema": {
+      "type": "string",
+      "title": "Dono das tabelas do Sankhya",
+      "description": "Esquema dono das tabelas (ex.: SANKHYA) quando o usuário é só de leitura. Vazio: o próprio usuário."
+    },
+    "teste_user": {
+      "type": "string",
+      "title": "Usuário da base de teste",
+      "description": "Vazio: sem base de teste. O endereço e a senha de teste vazios repetem os de produção."
+    },
+    "teste_connect_string": {
+      "type": "string",
+      "title": "Base de teste (host:porta/serviço)",
+      "description": "Vazio: o mesmo endereço da produção."
+    },
+    "teste_password": {
+      "type": "string",
+      "title": "Senha da base de teste",
+      "description": "Vazio: a mesma senha da produção.",
+      "sensitive": true
+    },
+    "teste_schema": {
+      "type": "string",
+      "title": "Dono das tabelas na base de teste",
+      "description": "Vazio: o próprio usuário de teste."
+    },
+    "api_client_id": {
+      "type": "string",
+      "title": "Gateway do Sankhya: Client ID",
+      "description": "Só para quem não tem acesso direto ao Oracle (Sankhya na nuvem). Vazio: usa SANKHYA_CLIENT_ID.",
+      "sensitive": true
+    },
+    "api_client_secret": {
+      "type": "string",
+      "title": "Gateway do Sankhya: Client Secret",
+      "description": "Vazio: usa SANKHYA_CLIENT_SECRET.",
+      "sensitive": true
+    },
+    "api_x_token": {
+      "type": "string",
+      "title": "Gateway do Sankhya: X-Token",
+      "description": "Token da aplicação no portal do desenvolvedor. Vazio: usa SANKHYA_X_TOKEN.",
+      "sensitive": true
+    },
+    "api_url": {
+      "type": "string",
+      "title": "Gateway do Sankhya: endereço",
+      "description": "Vazio: https://api.sankhya.com.br (sandbox: https://api.sandbox.sankhya.com.br)."
+    }
+  },
+  "mcpServers": {
+    "oracle": {
+      "command": "node",
+      "args": ["${CLAUDE_PLUGIN_ROOT}/mcp/oracle.mjs"],
+      "env": {
+        "CFG_ORACLE_CONNECT_STRING": "${user_config.oracle_connect_string}",
+        "CFG_ORACLE_USER": "${user_config.oracle_user}",
+        "CFG_ORACLE_PASSWORD": "${user_config.oracle_password}",
+        "CFG_ORACLE_SCHEMA": "${user_config.oracle_schema}",
+        "CFG_TESTE_USER": "${user_config.teste_user}",
+        "CFG_TESTE_CONNECT_STRING": "${user_config.teste_connect_string}",
+        "CFG_TESTE_PASSWORD": "${user_config.teste_password}",
+        "CFG_TESTE_SCHEMA": "${user_config.teste_schema}",
+        "CFG_API_CLIENT_ID": "${user_config.api_client_id}",
+        "CFG_API_CLIENT_SECRET": "${user_config.api_client_secret}",
+        "CFG_API_X_TOKEN": "${user_config.api_x_token}",
+        "CFG_API_API_URL": "${user_config.api_url}",
+        "SANKHYA_PROJETO": "${CLAUDE_PROJECT_DIR}"
+      }
+    },
+    "ajuda": {
+      "command": "node",
+      "args": ["${CLAUDE_PLUGIN_ROOT}/mcp/ajuda.mjs"]
+    }
+  }
+}

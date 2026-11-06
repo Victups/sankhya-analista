@@ -1,0 +1,17 @@
+# Exportações, planilhas e resultados de consulta (podem ter dados pessoais): nunca no git
+dados/
+*.csv
+*.xls
+*.xlsx
+*.xlsm
+Result_*.json
+
+# Segredos
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+.claude/settings.local.json
+
+node_modules/
