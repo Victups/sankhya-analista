@@ -1,0 +1,6 @@
+{
+  "extraKnownMarketplaces": {
+    "sankhya-analista": { "source": { "source": "github", "repo": "Victups/sankhya-analista" } }
+  },
+  "enabledPlugins": { "sankhya-analista@sankhya-analista": true }
+}
