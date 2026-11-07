@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024" role="img" aria-label="sankhya-analista">
+  <defs>
+    <linearGradient id="fundo" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0b1f1a"/>
+      <stop offset="1" stop-color="#0f172a"/>
+    </linearGradient>
+    <linearGradient id="verde" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#34d399"/>
+      <stop offset="1" stop-color="#22d3ee"/>
+    </linearGradient>
+  </defs>
+  <rect width="1024" height="1024" fill="url(#fundo)"/>
+  <!-- banco de dados -->
+  <path d="M230 290 V700 A190 74 0 0 0 610 700 V290 Z" fill="url(#verde)" fill-opacity="0.16"/>
+  <path d="M230 290 V700 A190 74 0 0 0 610 700 V290" fill="none" stroke="url(#verde)" stroke-width="16" stroke-linejoin="round"/>
+  <path d="M230 427 A190 74 0 0 0 610 427" fill="none" stroke="url(#verde)" stroke-width="14"/>
+  <path d="M230 564 A190 74 0 0 0 610 564" fill="none" stroke="url(#verde)" stroke-width="14"/>
+  <ellipse cx="420" cy="290" rx="190" ry="74" fill="url(#verde)" fill-opacity="0.35" stroke="url(#verde)" stroke-width="16"/>
+  <!-- lupa com grafo -->
+  <circle cx="660" cy="640" r="150" fill="#0b1f1a" fill-opacity="0.82" stroke="#ffffff" stroke-width="38"/>
+  <line x1="768" y1="748" x2="880" y2="860" stroke="#ffffff" stroke-width="52" stroke-linecap="round"/>
+  <g stroke="url(#verde)" stroke-width="12" stroke-linecap="round">
+    <line x1="610" y1="600" x2="715" y2="585"/>
+    <line x1="610" y1="600" x2="660" y2="705"/>
+    <line x1="715" y1="585" x2="660" y2="705"/>
+  </g>
+  <g fill="#34d399">
+    <circle cx="610" cy="600" r="24"/>
+    <circle cx="715" cy="585" r="24"/>
+    <circle cx="660" cy="705" r="24"/>
+  </g>
+</svg>
