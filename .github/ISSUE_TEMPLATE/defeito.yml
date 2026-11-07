@@ -1,0 +1,67 @@
+name: Defeito
+description: Algo não funciona como esperado
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **Não cole senhas, tokens, endereços de banco nem dados de empresa ou de pessoas** (CPF, CNPJ, salários).
+        Troque por valores fictícios. Falha de segurança: use o link de vulnerabilidade da página anterior, não esta issue.
+  - type: textarea
+    id: o-que-aconteceu
+    attributes:
+      label: O que aconteceu
+      description: Mensagem de erro (sem dados sensíveis) e o que você esperava.
+    validations:
+      required: true
+  - type: textarea
+    id: como-reproduzir
+    attributes:
+      label: Como reproduzir
+      placeholder: "1. Pedi para ...\n2. O agente chamou a ferramenta ...\n3. Apareceu ..."
+    validations:
+      required: true
+  - type: dropdown
+    id: conexao
+    attributes:
+      label: Conexão com o banco
+      options:
+        - Oracle direto
+        - API Gateway do Sankhya
+        - Sem banco (só dicionário e ajuda)
+    validations:
+      required: true
+  - type: input
+    id: versao-plugin
+    attributes:
+      label: Versão do plugin
+      description: Saída de `claude plugin list` ou a tag usada.
+      placeholder: "0.3.0"
+    validations:
+      required: true
+  - type: input
+    id: versao-sankhya
+    attributes:
+      label: Versão do Sankhya
+      description: Aparece em `verificar_conexao`.
+      placeholder: "4.36"
+  - type: dropdown
+    id: sistema
+    attributes:
+      label: Sistema operacional
+      options:
+        - Windows
+        - macOS
+        - Linux
+  - type: textarea
+    id: log
+    attributes:
+      label: Saída ou log (opcional)
+      render: text
+  - type: checkboxes
+    id: confirmacao
+    attributes:
+      label: Confirmação
+      options:
+        - label: Não há senha, token, endereço de banco nem dado de empresa ou de pessoa neste relato.
+          required: true
