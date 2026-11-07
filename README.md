@@ -205,11 +205,27 @@ local), segredo ou frase que pareça ordem ao agente.
 ## Configuração
 
 
+`node hooks/travas.mjs texto <arquivo>` confere se um texto tem dado de empresa (CPF, CNPJ, e-mail, IP, valor, código
+local), segredo ou frase que pareça ordem ao agente.
+
+> No modo API Gateway não existe transação somente leitura: a única proteção é a trava de SQL, e `verificar_conexao` avisa.
+
+## Configuração
+
+
 | Trava (hook) | Bloqueia |
 |---|---|
 | Segredos | Ler ou expor `.env`, chaves e credenciais; ler o cofre de senhas pelo terminal |
 | Banco por fora | `sqlplus`, `oracledb`... e os serviços web do Sankhya (`service.sbr`, `DbExplorerSP`, `CRUDServiceProvider`) pelo terminal |
 | Git | `git add --force` e commit de `dados/`, planilhas, CSV e `Result_*.json` |
+
+`node hooks/travas.mjs texto <arquivo>` confere se um texto tem dado de empresa (CPF, CNPJ, e-mail, IP, valor, código
+local), segredo ou frase que pareça ordem ao agente.
+
+> No modo API Gateway não existe transação somente leitura: a única proteção é a trava de SQL, e `verificar_conexao` avisa.
+
+## Configuração
+
 
 `node hooks/travas.mjs texto <arquivo>` confere se um texto tem dado de empresa (CPF, CNPJ, e-mail, IP, valor, código
 local), segredo ou frase que pareça ordem ao agente.

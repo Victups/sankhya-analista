@@ -1,0 +1,26 @@
+name: Sugestão
+description: Uma ideia de melhoria ou de nova skill
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problema
+    attributes:
+      label: Qual problema isso resolve
+      description: Descreva a situação do dia a dia, sem dados de empresa.
+    validations:
+      required: true
+  - type: textarea
+    id: proposta
+    attributes:
+      label: Como você imagina que funcione
+    validations:
+      required: true
+  - type: textarea
+    id: alternativas
+    attributes:
+      label: O que você faz hoje, ou alternativas que considerou
+  - type: textarea
+    id: fonte
+    attributes:
+      label: Fonte (opcional)
+      description: Artigo da Central de Ajuda ou documentação do Sankhya que sustenta a ideia.

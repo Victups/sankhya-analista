@@ -1,0 +1,52 @@
+name: Conhecimento
+description: Um fato do conhecimento geral está errado, ou você confirmou um deles na sua base
+labels: ["conhecimento"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        O conhecimento geral só entra com fatos do produto Sankhya e passa por revisão. **Não inclua dados de empresa**
+        (nomes, CPF, CNPJ, valores, códigos locais). Para propor um fato novo, use a skill `propor-conhecimento`.
+  - type: dropdown
+    id: tipo
+    attributes:
+      label: O que você quer informar
+      options:
+        - Está errado
+        - Confirmei na minha base
+        - Falta uma informação
+    validations:
+      required: true
+  - type: input
+    id: arquivo
+    attributes:
+      label: Arquivo e trecho
+      placeholder: "conhecimento-geral/governanca.md, seção Dicionário e personalizações"
+    validations:
+      required: true
+  - type: textarea
+    id: observado
+    attributes:
+      label: O que você viu
+      description: O comportamento, sem dados da empresa.
+    validations:
+      required: true
+  - type: input
+    id: versao-sankhya
+    attributes:
+      label: Versão do Sankhya
+      placeholder: "4.36"
+    validations:
+      required: true
+  - type: input
+    id: fonte
+    attributes:
+      label: Fonte (opcional)
+      description: Número do artigo da Central de Ajuda ou link da documentação.
+  - type: checkboxes
+    id: confirmacao
+    attributes:
+      label: Confirmação
+      options:
+        - label: Não há dado de empresa nem de pessoa neste relato.
+          required: true
