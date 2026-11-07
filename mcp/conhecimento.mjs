@@ -6,6 +6,7 @@ import { join, relative } from 'node:path';
 import { PALAVRAS_VAZIAS, SINONIMOS, termos } from './dicionario.mjs';
 
 const PESO = { empresa: 1.5, sql: 1.3, geral: 1 };
+const GENERICOS = new Set(['CONHECIMENTO', 'GERAL', 'SQL', 'MD', 'README']);
 // plural simples: CUSTOS -> CUSTO, LANCAMENTOS -> LANCAMENTO, INSTRUCOES -> INSTRUCAO
 const radical = p => (p.length > 4 ? p.replace(/OES$/, 'AO').replace(/S$/, '') : p);
 const tokens = s => termos(s).filter(p => !PALAVRAS_VAZIAS.has(p)).map(radical);
@@ -38,12 +39,24 @@ export function montarCorpus(projeto, pastaGeral) {
   const corpus = [];
   const add = (origem, arquivo, base, trechos) => trechos.forEach(t => corpus.push({ origem, arquivo: relative(base, arquivo).replaceAll('\\', '/'), ...t }));
   for (const a of arquivos(join(projeto, 'conhecimento'), '.md')) add('empresa', a, projeto, trechosDeNota(readFileSync(a, 'utf8')));
-  // consulta validada inteira e um trecho: o cabecalho diz o objetivo, o SQL diz as tabelas
-  for (const a of arquivos(join(projeto, 'sql'), '.sql')) add('sql', a, projeto, [{ linha: 1, secao: '', texto: readFileSync(a, 'utf8') }]);
+  // consulta validada inteira e um trecho, indexado pelo que descreve a pergunta: comentarios e tabelas (o codigo
+  // repetiria SELECT/CASE e diluiria a busca)
+  const consulta = texto => ({
+    linha: 1, secao: '', texto,
+    indice: [...texto.matchAll(/--([^\n]*)/g)].map(m => m[1]).join(' ')
+      + ' ' + [...texto.matchAll(/\b(?:FROM|JOIN)\s+([A-Z][A-Z0-9_]+)/gi)].map(m => m[1]).join(' '),
+  });
+  for (const a of arquivos(join(projeto, 'sql'), '.sql')) add('sql', a, projeto, [consulta(readFileSync(a, 'utf8'))]);
   for (const a of arquivos(pastaGeral, '.md').filter(a => !/REGRAS\.md$/.test(a))) {
     add('geral', a, join(pastaGeral, '..'), trechosDeNota(readFileSync(a, 'utf8')));
   }
-  for (const t of corpus) t.tokens = tokens(`${t.secao} ${t.texto}`);
+  // consultas gerais do plugin (ponto de partida para qualquer empresa)
+  for (const a of arquivos(pastaGeral, '.sql')) add('geral', a, join(pastaGeral, '..'), [consulta(readFileSync(a, 'utf8'))]);
+  for (const t of corpus) {
+    t.tokens = tokens(`${t.secao} ${t.indice ?? t.texto}`);
+    // nome da pasta e do arquivo (sql/VENDAS/vendas.sql, conhecimento/ESTOQUE.md) funciona como titulo
+    t.titulo = tokens(t.arquivo.replace(/[\\/_.-]/g, ' ')).filter(p => !GENERICOS.has(p));
+  }
   return corpus;
 }
 
@@ -64,11 +77,26 @@ export function buscarConhecimento(corpus, termo, quantidade = 8) {
       const idf = Math.log(1 + (N - df[p] + 0.5) / (df[p] + 0.5));
       s += idf * (f * (k1 + 1)) / (f + k1 * (1 - b + b * t.tokens.length / media));
     }
-    return [t, s * PESO[t.origem]];
-  }).filter(([, s]) => s > 0).sort((a, b) => b[1] - a[1]).slice(0, quantidade);
+    // assunto no nome do arquivo vale como titulo: +50% por palavra encontrada
+    const noTitulo = consulta.filter(p => t.titulo?.includes(p)).length;
+    return [t, s * PESO[t.origem] * (1 + 0.5 * noTitulo)];
+  }).filter(([, s]) => s > 0).sort((a, b) => b[1] - a[1]);
   if (!pontuados.length) return `Nada no conhecimento para "${termo}". Tente outras palavras; se for novo, investigue e registre.`;
+  // a melhor consulta pronta sempre aparece (empresa ou geral), mesmo quando as notas ocupam as primeiras posicoes
+  const ehConsulta = ([t]) => t.arquivo.endsWith('.sql');
+  const escolhidos = pontuados.slice(0, quantidade);
+  const melhorConsulta = pontuados.find(ehConsulta);
+  // ...desde que seja do assunto (pelo menos 40% da pontuacao da melhor resposta)
+  if (melhorConsulta && !escolhidos.some(ehConsulta) && melhorConsulta[1] >= 0.4 * pontuados[0][1]) {
+    escolhidos.splice(Math.max(quantidade - 1, 0), 1, melhorConsulta);
+  }
+  return formatar(escolhidos);
+}
+
+function formatar(pontuados) {
   return pontuados.map(([t]) => {
-    const texto = t.origem === 'sql' ? t.texto.split('\n').slice(0, 8).join('\n') : t.texto.trim();
+    // consulta: so o cabecalho (objetivo e regra); o arquivo inteiro se le com Read se for usar
+    const texto = t.arquivo.endsWith('.sql') ? t.texto.split('\n').slice(0, 8).join('\n') : t.texto.trim();
     return `[${t.origem}] ${t.arquivo}:${t.linha}${t.secao ? ` (${t.secao})` : ''}\n  ${texto.length > 600 ? `${texto.slice(0, 600)}...` : texto}`;
   }).join('\n');
 }
@@ -90,6 +118,11 @@ export function testes() {
   assert.match(buscarConhecimento(corpus, 'fornecedor'), /TGFPAR/);
   assert.match(buscarConhecimento(corpus, 'cadastro de clientes'), /^\[geral\] conhecimento-geral\/comercial\.md/); // sinonimo
   assert.match(buscarConhecimento(corpus, 'xyzw'), /^Nada no conhecimento/);
+  // a consulta pronta entra mesmo atras das notas da empresa (peso maior)
+  const comConsulta = [...corpus, { origem: 'geral', arquivo: 'conhecimento-geral/sql/custo.sql', linha: 1, secao: '',
+    texto: '-- Recalculo de custos: conferir\nSELECT 1 FROM DUAL', tokens: tokens('Recalculo de custos conferir TGFCUS') }];
+  const r1 = buscarConhecimento(comConsulta, 'recalculo de custos', 1);
+  assert.match(r1, /^\[geral\] conhecimento-geral\/sql\/custo\.sql:1\n {2}-- Recalculo de custos/);
   console.log('conhecimento: todos os testes passaram');
 }
 

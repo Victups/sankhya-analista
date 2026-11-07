@@ -6,7 +6,7 @@ description: Montar, corrigir ou validar uma consulta SQL (Oracle) no banco do S
 # Consulta SQL no Sankhya
 
 1. **Conhecimento primeiro.** `buscar_conhecimento` com a pergunta: se já existe consulta validada em `sql/` para
-   algo parecido, parta dela (é a biblioteca de consultas verificadas da empresa). Leia só os trechos que a busca
+   algo parecido, parta dela (a biblioteca de consultas verificadas: as da empresa em `sql/` e as gerais do plugin). Leia só os trechos que a busca
    apontar, não as notas inteiras. Se uma nota diz que um campo não é preenchido ou que uma regra é diferente, siga a nota.
 
 2. **Campos e junções.** `descrever_tabela` em cada tabela: use só campos que existem no banco (os da linha "Nao

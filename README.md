@@ -96,7 +96,7 @@ senhas pelo terminal; acessar o banco por fora do MCP (sqlplus, oracledb...) ou 
 `Result_*.json`. `node hooks/travas.mjs texto <arquivo>` verifica se um texto tem dado de empresa (CPF, CNPJ, e-mail,
 IP, valor, código local, nome da empresa com `--empresa`), segredo ou frase que pareça ordem ao agente.
 
-**Conhecimento geral** (`conhecimento-geral/`): o que vale para qualquer Sankhya. O da empresa prevalece.
+**Conhecimento geral** (`conhecimento-geral/`): o que vale para qualquer Sankhya, mais uma biblioteca de consultas gerais em `conhecimento-geral/sql/` (vendas e compras, pagar e receber, saldo bancário, estoque, personalizações, admissões). O da empresa prevalece.
 
 **Modelos** (`templates/`): estrutura do repositório da empresa e componente HTML5 base.
 

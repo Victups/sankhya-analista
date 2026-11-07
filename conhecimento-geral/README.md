@@ -22,3 +22,4 @@ ajuda. "Visto numa base" = comportamento observado em uma instalação: conferir
 - [folha-e-esocial.md](folha-e-esocial.md): Pessoal+, eventos e bases, guias, registro fiscal, retornos do eSocial, remessa da folha.
 - [comercial.md](comercial.md): TOP e tipo de movimento, valores e impostos da nota, cancelamento, compras, cotação, XML, contratos, logística, importação.
 - [governanca.md](governanca.md): dicionário, personalizações, objetos do Oracle, base de teste, versão e atualização, log de preferências, dashboards.
+- [sql/](sql/): consultas gerais, ponto de partida para qualquer empresa (vendas e compras por mês, pagar e receber em aberto, saldo bancário de hoje, estoque valorizado, inventário de personalizações, admissões e desligamentos). Cada uma diz a regra do produto e o que ajustar; validadas numa base 4.36, rode na sua base de teste antes de usar.
