@@ -35,23 +35,43 @@ export function trechosDeNota(texto) {
   return trechos;
 }
 
+// Arquivo .sql de painel com varias consultas numeradas ("-- 1) TITULO" logo depois de uma linha de tracos): uma
+// consulta por trecho, com a linha e o titulo, para a busca achar a certa. Sem numeracao (ou com uma so), o arquivo
+// e um trecho so. Comentario numerado solto dentro do codigo nao parte nada: precisa da linha de tracos antes.
+const TRACOS = /^--\s*[-=]{10,}\s*$/;
+const TITULO = /^--\s*(\d+[.)])\s+(\S.*)$/;
+export function consultasDoArquivo(texto) {
+  const linhas = texto.split('\n');
+  const inicios = [];
+  linhas.forEach((l, i) => { if (i > 0 && TITULO.test(l.trim()) && TRACOS.test(linhas[i - 1].trim())) inicios.push(i - 1); });
+  if (inicios.length < 2) return [{ linha: 1, secao: '', texto }];
+  const trechos = [];
+  const cabecalho = linhas.slice(0, inicios[0]).join('\n');
+  if (cabecalho.trim()) trechos.push({ linha: 1, secao: '', texto: cabecalho });
+  inicios.forEach((ini, k) => {
+    const [, numero, titulo] = linhas[ini + 1].trim().match(TITULO);
+    trechos.push({ linha: ini + 1, secao: `${numero} ${titulo}`.slice(0, 120), texto: linhas.slice(ini, inicios[k + 1] ?? linhas.length).join('\n') });
+  });
+  return trechos;
+}
+
 export function montarCorpus(projeto, pastaGeral) {
   const corpus = [];
   const add = (origem, arquivo, base, trechos) => trechos.forEach(t => corpus.push({ origem, arquivo: relative(base, arquivo).replaceAll('\\', '/'), ...t }));
   for (const a of arquivos(join(projeto, 'conhecimento'), '.md')) add('empresa', a, projeto, trechosDeNota(readFileSync(a, 'utf8')));
-  // consulta validada inteira e um trecho, indexado pelo que descreve a pergunta: comentarios e tabelas (o codigo
-  // repetiria SELECT/CASE e diluiria a busca)
-  const consulta = texto => ({
-    linha: 1, secao: '', texto,
-    indice: [...texto.matchAll(/--([^\n]*)/g)].map(m => m[1]).join(' ')
-      + ' ' + [...texto.matchAll(/\b(?:FROM|JOIN)\s+([A-Z][A-Z0-9_]+)/gi)].map(m => m[1]).join(' '),
-  });
-  for (const a of arquivos(join(projeto, 'sql'), '.sql')) add('sql', a, projeto, [consulta(readFileSync(a, 'utf8'))]);
+  // cada consulta e um trecho, indexado pelo que descreve a pergunta: comentarios e tabelas (o codigo repetiria
+  // SELECT/CASE e diluiria a busca)
+  const consultas = texto => consultasDoArquivo(texto).map(t => ({
+    ...t,
+    indice: [...t.texto.matchAll(/--([^\n]*)/g)].map(m => m[1]).join(' ')
+      + ' ' + [...t.texto.matchAll(/\b(?:FROM|JOIN)\s+([A-Z][A-Z0-9_]+)/gi)].map(m => m[1]).join(' '),
+  }));
+  for (const a of arquivos(join(projeto, 'sql'), '.sql')) add('sql', a, projeto, consultas(readFileSync(a, 'utf8')));
   for (const a of arquivos(pastaGeral, '.md').filter(a => !/REGRAS\.md$/.test(a))) {
     add('geral', a, join(pastaGeral, '..'), trechosDeNota(readFileSync(a, 'utf8')));
   }
   // consultas gerais do plugin (ponto de partida para qualquer empresa)
-  for (const a of arquivos(pastaGeral, '.sql')) add('geral', a, join(pastaGeral, '..'), [consulta(readFileSync(a, 'utf8'))]);
+  for (const a of arquivos(pastaGeral, '.sql')) add('geral', a, join(pastaGeral, '..'), consultas(readFileSync(a, 'utf8')));
   for (const t of corpus) {
     t.tokens = tokens(`${t.secao} ${t.indice ?? t.texto}`);
     // nome da pasta e do arquivo (sql/VENDAS/vendas.sql, conhecimento/ESTOQUE.md) funciona como titulo
@@ -123,6 +143,16 @@ export function testes() {
     texto: '-- Recalculo de custos: conferir\nSELECT 1 FROM DUAL', tokens: tokens('Recalculo de custos conferir TGFCUS') }];
   const r1 = buscarConhecimento(comConsulta, 'recalculo de custos', 1);
   assert.match(r1, /^\[geral\] conhecimento-geral\/sql\/custo\.sql:1\n {2}-- Recalculo de custos/);
+  // arquivo de painel com consultas numeradas: cabecalho + uma consulta por trecho, com linha e titulo
+  const tr = '-- ====\n-- PAINEL X\n-- ====\n\n-- ----------\n-- 1) POSICAO POR EMPRESA\n-- ----------\nSELECT 1 FROM TGFEST\n\n'
+    + '-- ----------\n-- 2) KITS (aba kits)\n-- ----------\nSELECT 2 FROM TGFPRO';
+  const cs = consultasDoArquivo(tr);
+  assert.deepEqual(cs.map(c => [c.linha, c.secao]), [[1, ''], [5, '1) POSICAO POR EMPRESA'], [10, '2) KITS (aba kits)']]);
+  assert.match(cs[2].texto, /SELECT 2 FROM TGFPRO/);
+  assert.doesNotMatch(cs[1].texto, /KITS/);
+  assert.equal(consultasDoArquivo('-- soma\nSELECT 1 FROM DUAL').length, 1);
+  // comentario numerado dentro do codigo (sem linha de tracos antes) nao parte o arquivo
+  assert.equal(consultasDoArquivo('-- 1) isto e um comentario\nSELECT 1 FROM DUAL\n-- 2) outro\nSELECT 2 FROM DUAL').length, 1);
   console.log('conhecimento: todos os testes passaram');
 }
 
