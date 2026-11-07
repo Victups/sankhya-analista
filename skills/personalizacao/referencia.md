@@ -105,6 +105,19 @@ e as consultas usam `DBA_SOURCE` e `DBA_TRIGGERS` no lugar.
   a descrição de before e after; vale o nome do método.
 - **Cuidados:** integração externa nunca síncrona dentro do evento (portal 07_listeners). Para achar o registro que
   falha num lote: parâmetro `BATSIZEEVTPROG = 0` (ajuda 360045107833). Eventos do Flow são outra coisa (`TWFEVE`).
+- **Trava em Java** (padrão do exemplo oficial do Tech Academy, 2022, MIT; a validar na sua versão): no
+  `beforeInsert`, ler o campo do registro novo e, se a regra falhar, lançar a exceção do Sankhya com o texto para o usuário.
+  A gravação não segue. A mensagem fica no código compilado, sem prefixo `CORE_`, e não aparece em busca no banco.
+  ```java
+  public void beforeInsert(PersistenceEvent event) throws Exception {
+      DynamicVO novo = (DynamicVO) event.getVo();
+      if (novo.asBigDecimal("ANOFABRIC").compareTo(new BigDecimal(2021)) < 0) {
+          throw new MGEModelException("Ano de fabricação menor que 2021 não é permitido");
+      }
+  }
+  ```
+  (`br.com.sankhya.modelcore.MGEModelException`, `br.com.sankhya.jape.vo.DynamicVO`.) Os outros métodos da interface
+  ficam vazios; a classe precisa implementar todos.
 
 ## Ação agendada
 
@@ -126,6 +139,37 @@ e as consultas usam `DBA_SOURCE` e `DBA_TRIGGERS` no lugar.
   31592968028055). Roda com as permissões do "Usuário Logado". Na base de teste os jobs podem estar desligados de
   propósito (`-Dsankhyaw.schedule.disable=true`, `-Dsankhyaw.only.jobs`, parâmetro `SERVERHOSTSCHED`) para não mandar
   e-mail nem integração de verdade (ajuda 31592968028055, 35857279731607).
+- **Sessão e conexão em Java** (padrão do exemplo oficial do Tech Academy, 2022, MIT): a ação agendada abre a sua
+  sessão e **fecha** a conexão, ao contrário do evento programável, que usa a conexão do evento e não a fecha.
+  ```java
+  SessionHandle hnd = null;
+  JdbcWrapper jdbc = null;
+  try {
+      hnd = JapeSession.open();
+      jdbc = EntityFacadeFactory.getDWFFacade().getJdbcWrapper();
+      DynamicVO parceiro = JapeFactory.dao(DynamicEntityNames.PARCEIRO).findOne("CODPARC = 1");
+      // parceiro.asBigDecimal("CODPARC"), parceiro.asString("NOMEPARC")
+  } finally {
+      JdbcWrapper.closeSession(jdbc);
+      JapeSession.close(hnd);
+  }
+  ```
+  `JapeFactory.dao(<entidade>)` lê com `findOne`/`find` e grava com `create().set("CAMPO", valor)...save()`.
+- **Enviar e-mail por Java:** não há chamada direta de envio no exemplo oficial: grava-se uma linha na fila de mensagens
+  (`TMDFMG`, entidade `DynamicEntityNames.FILA_MSG`) com `EMAIL`, `CODCON` = 0, `STATUS` = `Pendente`, `TIPOENVIO` = `E`,
+  `MAXTENTENVIO` = 3, `ASSUNTO` e `MENSAGEM` (texto como `char[]`), e o Sankhya envia. Depois do envio o `STATUS` vira
+  `Sucesso: Enviada` ou `Erro: Não Enviada` (com `MSGERRO` e `TENTENVIO` até `MAXTENTENVIO`) (valores vistos numa base de
+  teste, nov/2026). Para investigar "o e-mail não saiu" (texto sem acento no filtro):
+  ```sql
+  SELECT SUBSTR(M.STATUS, 1, 30) AS SITUACAO, COUNT(*) AS QTD, MAX(M.DTENTRADA) AS ULTIMA_ENTRADA
+    FROM TMDFMG M WHERE M.TIPOENVIO = 'E' AND M.DTENTRADA >= TRUNC(SYSDATE) - 7
+   GROUP BY SUBSTR(M.STATUS, 1, 30)
+  SELECT SUBSTR(M.MSGERRO, 1, 60) AS ERRO, COUNT(*) AS QTD FROM TMDFMG M
+   WHERE M.TIPOENVIO = 'E' AND M.STATUS LIKE 'Erro%' AND M.DTENTRADA >= TRUNC(SYSDATE) - 7
+   GROUP BY SUBSTR(M.MSGERRO, 1, 60) ORDER BY 2 DESC
+  ```
+  Base de teste copiada da produção pode ter a fila cheia de erro por o envio estar desligado de propósito: confira
+  antes de investigar.
 
 ## Regra de negócio (notas das Centrais)
 
@@ -187,6 +231,23 @@ e as consultas usam `DBA_SOURCE` e `DBA_TRIGGERS` no lugar.
 - **Bibliotecas:** "Sankhya-W-extensions.jar", "jape" e "mge-modelcore" (ajuda 360045110493, 4410963788951). Serviço da
   plataforma: `PlatformServiceFactory.getInstance().lookupService("@core:...")` (ex.: `@core:report.service` para
   imprimir relatório formatado de um botão, ajuda 360044597714).
+- **Chamar o Sankhya de fora** (cliente Java; padrão do exemplo oficial do Tech Academy, 2022, MIT): a biblioteca
+  `SWService.jar` (e o Apache Commons Codec) oferece `new SWServiceInvoker(url, usuario, senha).call("<Servico.metodo>",
+  "mge", corpoXml)`, que devolve um `Document`. Para ler registros por entidade, o serviço é
+  `CRUDServiceProvider.loadRecords` com este corpo (campos de entidades relacionadas pelo caminho, como `Cidade.UnidadeFederativa`;
+  o valor entra no `?` pelo `parameter`):
+  ```xml
+  <dataSet rootEntity="Parceiro" includePresentationFields="S" orderByExpression="this.CODPARC">
+    <entity path=""><fieldset list="CODPARC,NOMEPARC"/></entity>
+    <entity path="Cidade"><fieldset list="NOMECID"/></entity>
+    <criteria>
+      <expression>this.NOMEPARC LIKE ? AND this.CLIENTE = 'S'</expression>
+      <parameter type="S">JOSE%</parameter>
+    </criteria>
+  </dataSet>
+  ```
+  Não suba usuário e senha no código: leia de variável de ambiente. O agente não chama esse serviço pelo terminal
+  (as travas do plugin bloqueiam); quem roda é a pessoa, ou o código no servidor da empresa.
 - **Add-ons** (Add-on Studio, Gradle): `@ActionButton`, `@Listener`, `@BusinessRule`, `@Callback`, `@Job`; deploy
   local com `./gradlew clean deployAddon` (WildFly com depuração na porta 8787); instalação pelo Sankhya Place e
   Minhas Soluções (4.31+), com Desinstalar. Requisitos citados: Java 1.8, WildFly 23, plataforma 4.28+ (portal
