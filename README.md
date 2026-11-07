@@ -218,6 +218,14 @@ local), segredo ou frase que pareça ordem ao agente.
 
 ## Configuração
 
+
+`node hooks/travas.mjs texto <arquivo>` confere se um texto tem dado de empresa (CPF, CNPJ, e-mail, IP, valor, código
+local), segredo ou frase que pareça ordem ao agente.
+
+> No modo API Gateway não existe transação somente leitura: a única proteção é a trava de SQL, e `verificar_conexao` avisa.
+
+## Configuração
+
 <details>
 <summary><b>Opções de conexão</b> (Oracle direto)</summary>
 
