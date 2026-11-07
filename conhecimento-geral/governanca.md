@@ -17,6 +17,22 @@
   desativada; tabela `AD_` vazia (`NUM_ROWS = 0` sem `INSERTS` em `USER_TAB_MODIFICATIONS`); campo `AD_` sempre
   vazio (`USER_TAB_COLUMNS.NUM_NULLS = USER_TABLES.NUM_ROWS`). Dashboard antigo e procedure sem chamador visível
   podem estar em uso (prática, out/2026).
+- Origem de uma mensagem de bloqueio: as do núcleo do Sankhya trazem `[CORE_Exxxxx]` (ex.: `CORE_E04176` estoque
+  insuficiente, `CORE_E02496` jrxml inválido) (Central de Ajuda, jul/2026). Texto sem código pode ser regra de negócio,
+  evento programável, trigger/procedure ou extensão Java: o código ausente não prova que é personalização.
+- Regras de negócio (Configurações › Avançado): `TGFRNG` (regra: `ATIVO`, `TIPOEXPRESSAO`, `ONDE`, `QUANDO`, `EVENTO`,
+  `EXPRESSAO` = nome da procedure) e `TGFTRN` (regra por TOP, `SEQEXEC` = ordem). Só procedure está implementada;
+  script não. Regra sem evento de liberação cancela a operação; com evento, gera pedido de liberação
+  (Central de Ajuda "Regras de Negócio", jul/2026; tabelas e campos confirmados no dicionário, nov/2026).
+- Trigger existente numa tabela não indica personalização: as tabelas centrais têm dezenas de triggers do próprio
+  Sankhya, e a mensagem "estoque insuficiente" existe em procedure e trigger nativas (visto numa base, nov/2026).
+  Achar o texto da mensagem no código (`ALL_SOURCE`, que aceita `LIKE`) diz de que objeto ela vem, não que ele é
+  personalização. `ALL_OBJECTS.CREATED` só ajuda em base que não foi recriada por cópia (numa base recriada, todos os
+  objetos têm a mesma data). A mensagem de um evento Java fica no código compilado e não aparece no banco.
+- Ordem de execução entre trigger Oracle, regra de negócio e evento Java: sem fonte (a validar).
+- Busca por texto em personalizações: `TSIGDG.CONFIG` (gadget, XML), `TSIDSB.LAYOUT`, `TSIBTA.CONFIG`, `TSIEVP.CONFIG`,
+  `TGFRNG.CONFIG`, `TSIAAG` (`ACAO`, `EXPGATILHO`, `FONTEDADOS`) são texto e aceitam `UPPER(...) LIKE`; o texto de
+  view (`ALL_VIEWS.TEXT`) é `LONG` e não aceita: use `ALL_DEPENDENCIES` (visto numa base, nov/2026).
 
 ## Objetos do Oracle
 

@@ -30,7 +30,7 @@ try {
   const oracle = await conectar('oracle');
   assert.deepEqual((await oracle.listTools()).tools.map(t => t.name).sort(), ['buscar_conhecimento', 'buscar_dicionario',
     'caminho_entre_tabelas', 'consultar_sql', 'descrever_tabela', 'exportar_sql', 'extrair_dicionario', 'resumir_dados',
-    'verificar_conexao']);
+    'validar_sql', 'verificar_conexao']);
   assert.match(texto(await oracle.callTool({ name: 'resumir_dados', arguments: { arquivo: 'x.csv', somar: ['B'] } })), /SOMA_B\n2\t6/);
   assert.match(texto(await oracle.callTool({ name: 'buscar_conhecimento', arguments: { termo: 'campo calculado' } })), /\[geral\]/);
   // consulta geral do plugin aparece na busca, so com o cabecalho
