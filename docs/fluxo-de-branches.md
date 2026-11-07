@@ -37,8 +37,12 @@ Ficam em Settings, Rules, Rulesets (a do `develop` também em arquivo, para repe
 
 | Branch | Regra | Onde |
 |---|---|---|
-| `main` | sem apagar nem reescrever, pull request, `resultado` verde. **Sem** "Require linear history" e **sem** "Require branches to be up to date" | "Main Protect" |
-| `develop` | sem apagar nem reescrever, pull request, `resultado` verde (não precisa estar atualizado) | `.github/rulesets/develop.json` |
+| `main` | sem apagar nem reescrever, pull request, `resultado` verde. **Sem** "Require linear history" e **sem** "Require branches to be up to date". Método de merge permitido: **só Merge** | "Main Protect" |
+| `develop` | sem apagar nem reescrever, pull request, `resultado` verde (não precisa estar atualizado). Método de merge permitido: **só Squash** | `.github/rulesets/develop.json` |
+
+Travar o método na regra faz o botão do pull request oferecer só o certo para aquela branch: não dá para fazer
+squash na `main` nem merge commit no `develop` por engano. Em "Main Protect", dentro de "Require a pull request before
+merging", desmarque "Squash" e "Rebase" em **Allowed merge methods** e deixe só "Merge".
 
 Os dois itens desligados na `main` são o que permite o merge commit sem atrito: o histórico linear barra o commit de
 junção, e "estar atualizado" exigiria atualizar o `develop` com a `main` a cada release.
