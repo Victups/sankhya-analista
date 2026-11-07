@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1280" height="320" viewBox="0 0 1280 320" role="img" aria-label="sankhya-analista: analista desenvolvedor de Sankhya para o Claude Code">
+  <defs>
+    <linearGradient id="fundo" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0b1f1a"/>
+      <stop offset="1" stop-color="#0f172a"/>
+    </linearGradient>
+    <linearGradient id="traco" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#34d399"/>
+      <stop offset="1" stop-color="#22d3ee"/>
+    </linearGradient>
+  </defs>
+  <rect width="1280" height="320" rx="20" fill="url(#fundo)"/>
+  <g opacity="0.07" stroke="#ffffff" stroke-width="1">
+    <path d="M0 80H1280M0 160H1280M0 240H1280M320 0V320M640 0V320M960 0V320"/>
+  </g>
+  <rect x="80" y="74" width="6" height="108" rx="3" fill="url(#traco)"/>
+  <text x="110" y="134" fill="#ffffff" font-family="'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="64" font-weight="700" letter-spacing="-1">sankhya-analista</text>
+  <text x="112" y="182" fill="#a7f3d0" font-family="'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="26">Analista desenvolvedor de Sankhya para o Claude Code</text>
+  <g font-family="'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="18" fill="#e2e8f0">
+    <rect x="112" y="222" width="214" height="38" rx="19" fill="#ffffff" fill-opacity="0.10" stroke="#34d399" stroke-opacity="0.5"/>
+    <text x="134" y="247">Oracle só leitura</text>
+    <rect x="340" y="222" width="290" height="38" rx="19" fill="#ffffff" fill-opacity="0.10" stroke="#34d399" stroke-opacity="0.5"/>
+    <text x="362" y="247">Dicionário e grafo de tabelas</text>
+    <rect x="644" y="222" width="218" height="38" rx="19" fill="#ffffff" fill-opacity="0.10" stroke="#34d399" stroke-opacity="0.5"/>
+    <text x="666" y="247">Central de Ajuda</text>
+    <rect x="876" y="222" width="218" height="38" rx="19" fill="#ffffff" fill-opacity="0.10" stroke="#34d399" stroke-opacity="0.5"/>
+    <text x="898" y="247">Aprende com você</text>
+  </g>
+  <text x="1000" y="92" fill="#94a3b8" font-family="'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="16" text-anchor="middle">para o ERP</text>
+  <rect x="900" y="104" width="200" height="64" rx="12" fill="#ffffff"/>
+  <image x="919" y="118" width="162" height="36" xlink:href="data:image/png;base64,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"/>
+</svg>
