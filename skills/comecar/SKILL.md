@@ -1,40 +1,51 @@
 ---
 name: comecar
-description: Começar ou reconectar uma empresa no sankhya-analista. Cria a estrutura do repositório da empresa na pasta atual, testa a conexão com o banco do Sankhya (produção e teste), confere se o usuário só lê e extrai o dicionário. Use na primeira vez numa pasta nova ou quando a conexão mudar.
+description: Começar ou reconectar uma empresa no sankhya-analista. Monta o repositório da empresa na pasta atual (estrutura, git, repositório privado no GitHub se a pessoa quiser), testa a conexão com o banco do Sankhya (produção e teste), confere se o usuário só lê, extrai o dicionário e faz o primeiro commit se a pessoa autorizar. Use na primeira vez numa pasta nova ou quando a conexão mudar.
 ---
 
 # Começar uma empresa
 
-A pasta atual é o repositório da empresa. Se ela já tem `conhecimento/` e `dicionario/`, é uma reconexão: vá ao passo 3.
+A pasta atual é o repositório da empresa. O objetivo é a pessoa dizer "começar" e sair com tudo pronto, perguntando
+**só o que não dá para descobrir**: o nome da empresa, e um sim ou não para criar o repositório remoto e para o primeiro
+commit. A senha do banco a pessoa digita na tela do Claude Code, nunca no chat.
 
-1. **Estrutura.** Liste o que já existe na pasta. Copie o modelo sem sobrescrever nada:
-   `cp -rn "${CLAUDE_PLUGIN_ROOT}/templates/empresa/." .` (no PowerShell, copie arquivo a arquivo só os que não existem).
-   Pergunte o nome da empresa e troque `<EMPRESA>` no `CLAUDE.md`. Crie a pasta `dados/` (fica fora do git).
-   Se a pasta não for um repositório git, sugira `git init` e um repositório remoto **privado**; quem cria e commita é a pessoa.
+Se a pasta já tem `conhecimento/` e `dicionario/`, é uma reconexão: vá ao passo 4.
 
-2. **Plugin só nesta pasta, e para a equipe.** Recomende habilitar o plugin no escopo do projeto
-   (`claude plugin install sankhya-analista@sankhya-analista --scope project`), assim o MCP do banco só roda aqui.
-   Para os colegas receberem o plugin ao abrir o repositório, crie `.claude/settings.json` (vai para o git) com a
-   origem do catálogo que aparece em `claude plugin marketplace list --json` (entrada `sankhya-analista`):
-   ```json
-   {
-     "extraKnownMarketplaces": {
-       "sankhya-analista": { "source": { "source": "github", "repo": "Victups/sankhya-analista" } }
-     },
-     "enabledPlugins": { "sankhya-analista@sankhya-analista": true }
-   }
-   ```
-   (catálogo em outro git: `{ "source": "git", "url": "<url>" }`). Cada pessoa preenche a própria conexão; se o
-   convite não aparecer ao abrir a pasta, ela instala com o comando acima.
+1. **Diagnóstico (sem perguntar).** Veja e anote: se a pasta é um repositório git (`git rev-parse --is-inside-work-tree`),
+   se tem remoto (`git remote -v`), se tem `.claude/settings.json`, `CLAUDE.md`, `conhecimento/`, `dicionario/`, se o `gh` está
+   instalado e logado (`gh auth status`). Diga em uma frase o que já existe e o que vai fazer.
 
-3. **Conexão.** Chame `verificar_conexao` (base `producao`). Se falhar:
+2. **Estrutura (automático).** Copie o modelo sem sobrescrever nada:
+   `cp -rn "${CLAUDE_PLUGIN_ROOT}/templates/empresa/." .` (no PowerShell, copie arquivo a arquivo só os que não existem;
+   o modelo inclui arquivos de pasta oculta, como `.claude/settings.json`). Pergunte o nome da empresa (única pergunta
+   desta etapa) e troque `<EMPRESA>` no `CLAUDE.md`. Crie `dados/` (fica fora do git).
+   - Se a pasta não for um repositório git, rode `git init` (é local e não publica nada).
+   - **Equipe.** O `.claude/settings.json` copiado já aponta o catálogo do plugin e o habilita: o colega que clonar o
+     repositório recebe o convite ao abrir a pasta. Se o catálogo da pessoa vier de outra origem (veja
+     `claude plugin marketplace list --json`, entrada `sankhya-analista`), ajuste `extraKnownMarketplaces` (para um git
+     qualquer: `{ "source": "git", "url": "<url>" }`). Recomende o escopo do projeto
+     (`claude plugin install sankhya-analista@sankhya-analista --scope project`): o MCP do banco só roda nesta pasta.
+
+3. **Repositório remoto privado (uma pergunta).** Se já há remoto, confirme que é privado (`gh repo view --json visibility`,
+   quando o `gh` estiver logado) e siga. Se não há:
+   - **Com `gh` logado:** pergunte uma vez: "Posso criar o repositório **privado** `<empresa>-sankhya` em
+     `<conta ou organização>` no GitHub?" Criar repositório publica algo fora da máquina: só com o sim da pessoa.
+     Se sim: `gh repo create <conta>/<empresa>-sankhya --private --source=. --remote=origin` e confira que
+     `gh repo view --json visibility` devolve `PRIVATE`; se não for, avise e pare.
+   - **Sem `gh`** (ou a pessoa prefere outro lugar, como GitLab): entregue os passos: criar um repositório **privado e
+     vazio** no site, copiar a URL e rodar `git remote add origin <url>`. Sem remoto o plugin funciona igual; o remoto só
+     serve para compartilhar com a equipe e guardar cópia.
+   - O repositório da empresa **nunca** pode ser público: guarda dicionário e conhecimento do banco dela.
+
+4. **Conexão.** Chame `verificar_conexao` (base `producao`). Se falhar:
    - "Conexao nao configurada": preencher as opções do plugin (`/plugin` › sankhya-analista › configurar, ou
      `claude plugin configure sankhya-analista`) ou as variáveis de ambiente do README do plugin. A senha a pessoa
      digita na tela do Claude Code ou no PowerShell; nunca peça a senha no chat.
    - `NJS-510`/`NJS-503` (tempo esgotado): rede ou VPN desligada.
    - `ORA-01017`: usuário ou senha errados. `ORA-00942` em TDDTAB: falta informar o dono das tabelas (opção `oracle_schema`).
+   - Sem acesso direto ao Oracle (Sankhya na nuvem): opções do API Gateway (`api_client_id`, `api_client_secret`, `api_x_token`).
 
-4. **Só leitura?** Se o resultado disser "Pode gravar: SIM", avise uma vez que o agente não grava (o MCP bloqueia), mas
+5. **Só leitura?** Se o resultado disser "Pode gravar: SIM", avise uma vez que o agente não grava (o MCP bloqueia), mas
    que o ideal é um usuário só de leitura. Entregue ao DBA a proposta abaixo (você não executa nada disso) e registre a
    decisão da empresa na seção "Banco" do `CLAUDE.md`. Depois disso, não volte a questionar.
 
@@ -54,13 +65,21 @@ A pasta atual é o repositório da empresa. Se ela já tem `conhecimento/` e `di
    ```
    Com esse usuário, preencher a opção `oracle_schema` com o dono (ex.: SANKHYA).
 
-5. **Base de teste.** Se houver (opção `teste_user`), rode `verificar_conexao` com `base: teste`. Sem base de teste,
+6. **Base de teste.** Se houver (opção `teste_user`), rode `verificar_conexao` com `base: teste`. Sem base de teste,
    anote no `CLAUDE.md` que experimentos rodam só como consulta leve na produção.
 
-6. **Dicionário.** Rode `extrair_dicionario` (base `producao`). Ele grava `dicionario/` e o `MAPA.md`. Mostre o resumo.
-
-7. **CLAUDE.md.** Preencha a seção "Banco": versão do Oracle, usuário, dono das tabelas, se é só leitura e a decisão,
+7. **Dicionário.** Rode `extrair_dicionario` (base `producao`). Ele grava `dicionario/` e o `MAPA.md`. Mostre o resumo.
+   Preencha a seção "Banco" do `CLAUDE.md`: versão do Oracle, usuário, dono das tabelas, se é só leitura e a decisão,
    base de teste e data da extração.
 
-8. Diga à pessoa o que dá para pedir agora: investigar um problema, montar uma consulta, um painel HTML5, alterar um
-   relatório, registrar conhecimento.
+8. **Primeiro commit (uma pergunta).** Se a pasta é git, rode `git status --short` e mostre o que entraria. Confirme que
+   `dados/` e arquivos `.csv`/`.xls*` **não** aparecem (o `.gitignore` do modelo cuida disso; se aparecerem, pare e
+   corrija o `.gitignore` antes). Pergunte: "Faço o primeiro commit com estes arquivos
+   (e envio ao repositório remoto, se houver)?" Só com o sim:
+   `git add CLAUDE.md .gitignore .claude conhecimento dicionario` (caminhos específicos, nunca `git add -A`), `git commit`
+   com mensagem curta como "estrutura inicial do analista Sankhya" e, havendo remoto, `git push -u origin HEAD`.
+   Com o não, deixe os comandos prontos para a pessoa.
+
+9. **Resumo final.** Diga o que foi criado, o que ficou pendente (ex.: remoto, conexão de teste, usuário que grava) e o
+   que dá para pedir agora: investigar um problema, montar uma consulta, um painel HTML5, alterar um relatório, registrar
+   conhecimento. Se alguma etapa foi pulada, diga qual e como retomar (`comecar` pode ser repetida: não sobrescreve nada).

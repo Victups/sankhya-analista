@@ -96,6 +96,13 @@ A skill `comecar` monta o resto: copia a estrutura do repositório da empresa (s
 extrai o dicionário e **oferece o primeiro commit**. Só o nome da empresa é pergunta obrigatória; pode ser repetida
 sem risco. Detalhes, estrutura de pastas e o que ela nunca faz em
 [docs/repositorio-da-empresa.md](docs/repositorio-da-empresa.md).
+# 2. na pasta do repositório da empresa: instalar só para esse projeto
+claude plugin install sankhya-analista@sankhya-analista --scope project
+```
+
+3. O Claude Code pede as opções de conexão ao habilitar (depois: `claude plugin configure sankhya-analista`).
+4. Abra o Claude Code na pasta da empresa e peça para **começar**: a skill `comecar` confere a conexão, os
+   privilégios do usuário, extrai o dicionário e monta a estrutura do repositório da empresa.
 
 > **Sem acesso direto ao Oracle (Sankhya na nuvem)?** Use o API Gateway: veja [Configuração](#configuração).
 
@@ -183,6 +190,20 @@ O plugin foi desenhado para que o pior caso seja uma consulta lenta, nunca uma e
 - **Usuário só de leitura por padrão.** A skill `comecar` confere os privilégios e, se o usuário puder gravar, avisa e
   registra a decisão da empresa no `CLAUDE.md` dela.
 - **Dados pessoais fora do git.** Ficam em `dados/`, e a trava impede que subam por engano.
+
+| Trava (hook) | Bloqueia |
+|---|---|
+| Segredos | Ler ou expor `.env`, chaves e credenciais; ler o cofre de senhas pelo terminal |
+| Banco por fora | `sqlplus`, `oracledb`... e os serviços web do Sankhya (`service.sbr`, `DbExplorerSP`, `CRUDServiceProvider`) pelo terminal |
+| Git | `git add --force` e commit de `dados/`, planilhas, CSV e `Result_*.json` |
+
+`node hooks/travas.mjs texto <arquivo>` confere se um texto tem dado de empresa (CPF, CNPJ, e-mail, IP, valor, código
+local), segredo ou frase que pareça ordem ao agente.
+
+> No modo API Gateway não existe transação somente leitura: a única proteção é a trava de SQL, e `verificar_conexao` avisa.
+
+## Configuração
+
 
 | Trava (hook) | Bloqueia |
 |---|---|
