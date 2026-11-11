@@ -96,13 +96,9 @@ A skill `comecar` monta o resto: copia a estrutura do repositório da empresa (s
 extrai o dicionário e **oferece o primeiro commit**. Só o nome da empresa é pergunta obrigatória; pode ser repetida
 sem risco. Detalhes, estrutura de pastas e o que ela nunca faz em
 [docs/repositorio-da-empresa.md](docs/repositorio-da-empresa.md).
-# 2. na pasta do repositório da empresa: instalar só para esse projeto
-claude plugin install sankhya-analista@sankhya-analista --scope project
-```
 
-3. O Claude Code pede as opções de conexão ao habilitar (depois: `claude plugin configure sankhya-analista`).
-4. Abra o Claude Code na pasta da empresa e peça para **começar**: a skill `comecar` confere a conexão, os
-   privilégios do usuário, extrai o dicionário e monta a estrutura do repositório da empresa.
+> **Cursor, Codex, Gemini CLI, Antigravity ou VS Code (Copilot)?** Sem plugin do Claude Code: `node scripts/instalar.mjs
+> --cliente cursor` (ou `codex`, `gemini`, `antigravity`, `vscode`) na pasta da empresa. Veja [docs/outros-agentes.md](docs/outros-agentes.md).
 
 > **Sem acesso direto ao Oracle (Sankhya na nuvem)?** Use o API Gateway: veja [Configuração](#configuração).
 

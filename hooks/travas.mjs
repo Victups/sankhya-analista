@@ -1,6 +1,7 @@
 // Travas do plugin sankhya-analista (hooks do Claude Code).
 //   node travas.mjs pre     PreToolUse: bloqueia segredo, banco fora do MCP e commit de dados
 //   node travas.mjs sessao  SessionStart: injeta as regras do analista no repositorio da empresa
+//   node travas.mjs commit  pre-commit do git (scripts/instalar.mjs): barra dados e segredo, para qualquer agente
 // Teste: node travas.mjs --teste
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
@@ -23,8 +24,9 @@ function arquivosDoCommit(cwd, comando) {
   const git = args => execFileSync('git', args, { cwd, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] })
     .split('\n').filter(Boolean);
   try {
-    const todos = /\s(-a|--all|-\w*a\w*)\b/.test(comando) ? git(['diff', '--name-only']) : [];
-    return [...git(['diff', '--cached', '--name-only']), ...todos];
+    // ACMR: arquivo apagado do indice (git rm --cached) sai do commit, nao entra nele
+    const todos = /\s(-a|--all|-\w*a\w*)\b/.test(comando) ? git(['diff', '--name-only', '--diff-filter=ACMR']) : [];
+    return [...git(['diff', '--cached', '--name-only', '--diff-filter=ACMR']), ...todos];
   } catch {
     return []; // fora de um repositorio git
   }
@@ -200,6 +202,15 @@ else if (modo === 'texto') {
   }
   console.log(problemas ? `${problemas} ponto(s) para revisar.` : `${arquivos.length} arquivo(s) sem dados da empresa nem ordens ao agente.`);
   process.exitCode = problemas ? 1 : 0;
+}
+else if (modo === 'commit') {
+  const ruins = arquivosDoCommit(process.cwd(), 'git commit').filter(f => DADOS.test(f) || SEGREDO.test(`/${f}`));
+  if (ruins.length) {
+    console.error(`sankhya-analista: o commit levaria dados ou segredo para o git: ${ruins.slice(0, 10).join(', ')}.\n`
+      + 'Tire do commit (git restore --staged <arquivo>; se ja estiver versionado, git rm --cached <arquivo>) '
+      + 'e deixe esses arquivos em dados/, que fica fora do git.');
+    process.exitCode = 1;
+  }
 }
 else if (modo === 'pre') {
   const motivo = decidir(await lerEntrada());
