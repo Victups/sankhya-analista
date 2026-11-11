@@ -226,6 +226,33 @@ async function consultar(sql, maxLinhas, base) {
   });
 }
 
+// Valida sem trazer dado: o Oracle analisa a consulta inteira (tabelas, campos, sintaxe) e, com 1 = 0, nao le linha.
+export const embrulharVazio = texto => `SELECT * FROM (\n${texto}\n) WHERE 1 = 0`;
+
+// Erro de conexao ou de rede nao e erro da consulta: sobe como erro da ferramenta.
+const ERRO_DE_CONEXAO = /ORA-(12\d{3}|03113|03114|03135|01017|01033|01034|28000)|NJS-|DPI-/;
+
+export function veredito(mensagem) {
+  const m = String(mensagem);
+  if (ERRO_DE_CONEXAO.test(m)) return null;
+  const dica = /ORA-00918/.test(m) ? ' A validacao nao aceita duas colunas com o mesmo nome: de apelido (AS) a uma delas; sozinha a consulta pode estar correta.' : '';
+  return { valida: false, erro: ocultar(m.split('\n')[0]) + dica };
+}
+
+async function validar(sql, base) {
+  const texto = validarSql(sql);
+  return comConexao(base, async exec => {
+    try {
+      const r = await exec.linhas(embrulharVazio(texto), { max: 1 });
+      return JSON.stringify({ valida: true, colunas: r.colunas });
+    } catch (e) {
+      const v = veredito(e.message);
+      if (!v) throw e;
+      return JSON.stringify(v);
+    }
+  });
+}
+
 // CSV para Excel (separador ";", BOM UTF-8); numero com ponto decimal.
 export function paraCsv(colunas, linhas) {
   const cel = v => (v == null ? '' : /[;"\r\n]/.test(String(v)) ? `"${String(v).replace(/"/g, '""')}"` : String(v));
@@ -412,6 +439,16 @@ async function iniciar() {
     },
   }, ferramenta(({ sql, max_linhas, base }) => consultar(sql, max_linhas, base)));
 
+  server.registerTool('validar_sql', {
+    description: 'Confere se uma consulta SELECT/WITH esta correta (sintaxe, tabelas e campos que existem na base) SEM trazer '
+      + 'dado: o Oracle analisa a consulta e nao le linha. Devolve { valida, colunas } ou { valida: false, erro }. '
+      + 'Use antes de entregar uma consulta nova ou corrigida; mesmas travas do consultar_sql.',
+    inputSchema: {
+      sql: z.string().describe('Consulta SELECT ou WITH, uma instrucao'),
+      base: BASE,
+    },
+  }, ferramenta(({ sql, base }) => validar(sql, base)));
+
   server.registerTool('exportar_sql', {
     description: `Roda UMA consulta SELECT/WITH (mesmas travas do consultar_sql) e grava ate ${LIMITE_EXPORTACAO} linhas em `
       + 'dados/<nome>.csv (fora do git), devolvendo so colunas, total e amostra. Use quando o resultado for grande ou a '
@@ -561,6 +598,13 @@ function testes() {
   assert.throws(() => config('teste'), /falta ORACLE_ACME_TESTE_USER/); // nao cai para o ORACLE_TESTE_USER de outra empresa
   assert.equal(ocultar('falhou senha-acme em host-acme:1521/PRD'), 'falhou *** em ***');
   delete process.env.SANKHYA_CONEXAO;
+  // validar_sql: embrulho sem linhas, erro da consulta x erro de conexao
+  assert.equal(embrulharVazio('SELECT 1 FROM DUAL'), 'SELECT * FROM (\nSELECT 1 FROM DUAL\n) WHERE 1 = 0');
+  assert.deepEqual(veredito('ORA-00904: "P"."X": identificador invalido\nHelp: https://x'), { valida: false, erro: 'ORA-00904: "P"."X": identificador invalido' });
+  assert.match(veredito('ORA-00918: coluna definida de maneira ambigua').erro, /apelido/);
+  assert.equal(veredito('ORA-12541: TNS: sem listener'), null);
+  assert.equal(veredito('NJS-510: connection timed out'), null);
+  assert.throws(() => validarSql('DELETE FROM TGFPAR'), Error); // a trava vem antes do embrulho
   console.log('validarSql, datas, privilegios e opcoes: todos os testes passaram');
   testarDicionario();
   testarConhecimento();

@@ -25,8 +25,10 @@ description: Montar, corrigir ou validar uma consulta SQL (Oracle) no banco do S
    - Literais e apelidos sem acento. Período `[INI, FIM)`. Comentário de linha não termina com `;`.
    - Ordem estável (`ORDER BY`) quando a consulta for paginada num painel.
 
-4. **Validar pelo MCP.** Rode com `consultar_sql` antes de entregar: primeiro agregado ou com poucas linhas, filtrando
-   período. Confira totais com uma tela do Sankhya quando der. Resultado grande ou planilha pedida: `exportar_sql`
+4. **Validar pelo MCP.** Toda consulta nova ou corrigida passa primeiro por `validar_sql`: o Oracle confere sintaxe,
+   tabelas e campos sem ler nenhuma linha. Se voltar `valida: false`, corrija e valide de novo antes de mostrar a
+   consulta à pessoa (dois campos com o mesmo nome na lista também dão erro nessa validação: dê apelido). Depois rode
+   com `consultar_sql`: primeiro agregado ou com poucas linhas, filtrando período. Confira totais com uma tela do Sankhya quando der. Resultado grande ou planilha pedida: `exportar_sql`
    (grava em `dados/`) e `resumir_dados` sobre o arquivo; script local só para o que ela não faz.
 
 5. **Registrar.** O que o resultado confirmou ou desmentiu vai para a nota da tabela (skill `registrar`). Consulta de

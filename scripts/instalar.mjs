@@ -274,7 +274,7 @@ async function testes() {
     const gerado = JSON.parse(lido('.agents/mcp_config.json')).mcpServers['sankhya-oracle'];
     const cliente = new Client({ name: 'teste-instalar', version: '1' });
     await cliente.connect(new StdioClientTransport({ command: process.execPath, args: gerado.args, env: { ...process.env, ...gerado.env }, stderr: 'ignore' }));
-    assert.equal((await cliente.listTools()).tools.length, 9);
+    assert.ok((await cliente.listTools()).tools.some(t => t.name === 'consultar_sql'));
     await cliente.close();
 
     // 2) pre-commit: dado e segredo barrados; apagar do indice nao e barrado; commit normal passa

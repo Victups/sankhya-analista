@@ -1,6 +1,6 @@
 {
   "name": "sankhya-analista",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "private": true,
   "description": "Dependencias dos servidores MCP do plugin sankhya-analista",
   "type": "module",

@@ -30,7 +30,7 @@ try {
   const oracle = await conectar('oracle');
   assert.deepEqual((await oracle.listTools()).tools.map(t => t.name).sort(), ['buscar_conhecimento', 'buscar_dicionario',
     'caminho_entre_tabelas', 'consultar_sql', 'descrever_tabela', 'exportar_sql', 'extrair_dicionario', 'resumir_dados',
-    'verificar_conexao']);
+    'validar_sql', 'verificar_conexao']);
   const instrucoes = oracle.getInstructions();
   assert.match(instrucoes, /SOMENTE LEITURA/);
   assert.ok(instrucoes.length <= 512, 'o Codex so garante os 512 primeiros caracteres das instrucoes do servidor');
