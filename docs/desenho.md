@@ -40,6 +40,12 @@ sem misturar dados de uma empresa com outra.
     `exportar_sql` para `dados/` e `resumir_dados` sobre o arquivo (perfil, grupos, somas, filtros), sem rodar código
     escrito pelo modelo. Busca no conhecimento em vez de ler notas inteiras, filtro na descrição de tabela grande,
     teto de ~11 mil tokens por consulta e artigo da ajuda em partes. As ferramentas MCP já entram sob demanda.
+14. **Outros agentes sem fork.** Cursor, Codex, Gemini CLI, Antigravity e o agente do Copilot no VS Code usam a mesma
+    fonte: MCP stdio, skills (`.agents/skills/`; no VS Code, `.github/skills/`) e `AGENTS.md` são padrões que todos leem. `scripts/instalar.mjs` escreve o config de MCP de cada
+    um (por máquina, no `.gitignore`), copia as skills com o prefixo `sankhya-`, gera o `AGENTS.md` com as regras e instala
+    um `pre-commit` do git para dados e segredo. O `AGENTS.md` é o arquivo único de decisões da empresa (o `CLAUDE.md`
+    do modelo só o importa). Sem o hook de `PreToolUse`, o usuário do banco só de leitura vira requisito. ChatGPT e Gemini
+    no navegador ficam fora (MCP só remoto, banco atrás da VPN). Detalhes e limites em `docs/outros-agentes.md`.
 
 ## Peças
 
@@ -53,6 +59,7 @@ sem misturar dados de uma empresa com outra.
 | Travas | `hooks/travas.mjs` | regras na sessão; bloqueio de segredo, cofre, banco e serviços do Sankhya fora do MCP e commit de dados; verificador de texto |
 | Skills | `skills/*/SKILL.md` | procedimentos: comecar, mapear-banco, investigar, consulta-sql, painel-html5, alterar-relatorio, registrar, propor-conhecimento |
 | Conhecimento geral | `conhecimento-geral/` | o que vale para qualquer Sankhya |
+| Instalador | `scripts/instalar.mjs` | config de MCP por cliente, skills, `AGENTS.md` e `pre-commit` para agentes que não são o Claude Code |
 | Modelos | `templates/` | repositório da empresa e componente HTML5 |
 
 ## Fluxos

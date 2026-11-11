@@ -8,7 +8,7 @@
     "node": ">=18"
   },
   "scripts": {
-    "teste": "node mcp/oracle.mjs --teste && node mcp/ajuda.mjs --teste && node mcp/teste-protocolo.mjs && node hooks/travas.mjs --teste && node hooks/travas.mjs texto conhecimento-geral"
+    "teste": "node mcp/oracle.mjs --teste && node mcp/ajuda.mjs --teste && node mcp/teste-protocolo.mjs && node hooks/travas.mjs --teste && node scripts/instalar.mjs --teste && node hooks/travas.mjs texto conhecimento-geral"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.32.1",

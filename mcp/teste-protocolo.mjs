@@ -31,6 +31,9 @@ try {
   assert.deepEqual((await oracle.listTools()).tools.map(t => t.name).sort(), ['buscar_conhecimento', 'buscar_dicionario',
     'caminho_entre_tabelas', 'consultar_sql', 'descrever_tabela', 'exportar_sql', 'extrair_dicionario', 'resumir_dados',
     'validar_sql', 'verificar_conexao']);
+  const instrucoes = oracle.getInstructions();
+  assert.match(instrucoes, /SOMENTE LEITURA/);
+  assert.ok(instrucoes.length <= 512, 'o Codex so garante os 512 primeiros caracteres das instrucoes do servidor');
   assert.match(texto(await oracle.callTool({ name: 'resumir_dados', arguments: { arquivo: 'x.csv', somar: ['B'] } })), /SOMA_B\n2\t6/);
   assert.match(texto(await oracle.callTool({ name: 'buscar_conhecimento', arguments: { termo: 'campo calculado' } })), /\[geral\]/);
   // consulta geral do plugin aparece na busca, so com o cabecalho
