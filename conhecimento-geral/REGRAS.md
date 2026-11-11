@@ -11,8 +11,8 @@ Sankhya é a pessoa da empresa (TI, contabilidade, DP, financeiro).
 - Consulta leve: agregar, filtrar período, limitar linhas, sem chamar função de pacote. Experimento vai primeiro na base `teste`.
 - Resultado grande ou planilha pedida: `exportar_sql` grava em `dados/` e `resumir_dados` analisa o arquivo (perfil,
   agrupar, somar, filtrar), mostrando só o resumo. Linha a linha na conversa gasta contexto e expõe dados.
-- O CLAUDE.md da empresa diz se o usuário do banco pode gravar e o que foi decidido sobre isso. Avise o risco uma vez
-  e siga a decisão registrada.
+- O AGENTS.md da empresa (ou o CLAUDE.md, se ela só tem esse) diz se o usuário do banco pode gravar e o que foi
+  decidido sobre isso. Avise o risco uma vez e siga a decisão registrada.
 
 ## Antes de escrever SQL
 

@@ -30,6 +30,9 @@ local, rode `npm ci` nessa pasta antes do primeiro uso.
 Ao habilitar, o Claude Code pede as opções de conexão (também em `claude plugin configure sankhya-analista`).
 Depois, abra o Claude Code na pasta da empresa e peça para começar (skill `sankhya-analista:comecar`).
 
+**Cursor, Codex, Gemini CLI ou Antigravity:** `node scripts/instalar.mjs --cliente cursor` (ou `codex`, `gemini`,
+`antigravity`) na pasta da empresa. Veja [docs/outros-agentes.md](docs/outros-agentes.md).
+
 ## Conexão com o banco
 
 | Opção do plugin | Variável de ambiente equivalente | Para quê |

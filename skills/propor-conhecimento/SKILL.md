@@ -34,7 +34,7 @@ nele o que o mantenedor revisar. Esta skill prepara a proposta; ela não altera 
    ```
 
 5. **Verificar.** Rode `node "${CLAUDE_PLUGIN_ROOT}/hooks/travas.mjs" texto propostas/<arquivo> --empresa "<nome>,<sigla>"`
-   com o nome e as siglas da empresa (do `CLAUDE.md`). Corrija cada achado (ou tire o fato) até sair sem achados.
+   com o nome e as siglas da empresa (do `AGENTS.md` ou do `CLAUDE.md`). Corrija cada achado (ou tire o fato) até sair sem achados.
 
 6. **Mostrar e enviar.** Mostre a proposta à pessoa e só envie com o aceite dela: arquivo para o mantenedor ou,
    se ela tiver acesso ao repositório do plugin no GitHub, um pull request só com esse arquivo em `propostas/`.
