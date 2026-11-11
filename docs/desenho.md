@@ -40,8 +40,8 @@ sem misturar dados de uma empresa com outra.
     `exportar_sql` para `dados/` e `resumir_dados` sobre o arquivo (perfil, grupos, somas, filtros), sem rodar código
     escrito pelo modelo. Busca no conhecimento em vez de ler notas inteiras, filtro na descrição de tabela grande,
     teto de ~11 mil tokens por consulta e artigo da ajuda em partes. As ferramentas MCP já entram sob demanda.
-14. **Outros agentes sem fork.** Cursor, Codex, Gemini CLI e Antigravity usam a mesma fonte: MCP stdio, skills em
-    `.agents/skills/` e `AGENTS.md` são padrões que os quatro leem. `scripts/instalar.mjs` escreve o config de MCP de cada
+14. **Outros agentes sem fork.** Cursor, Codex, Gemini CLI, Antigravity e o agente do Copilot no VS Code usam a mesma
+    fonte: MCP stdio, skills (`.agents/skills/`; no VS Code, `.github/skills/`) e `AGENTS.md` são padrões que todos leem. `scripts/instalar.mjs` escreve o config de MCP de cada
     um (por máquina, no `.gitignore`), copia as skills com o prefixo `sankhya-`, gera o `AGENTS.md` com as regras e instala
     um `pre-commit` do git para dados e segredo. O `AGENTS.md` é o arquivo único de decisões da empresa (o `CLAUDE.md`
     do modelo só o importa). Sem o hook de `PreToolUse`, o usuário do banco só de leitura vira requisito. ChatGPT e Gemini

@@ -1,6 +1,6 @@
 # Usar o sankhya-analista fora do Claude Code
 
-Vale para **Cursor, Codex (OpenAI), Gemini CLI e Antigravity (Google)**. É o mesmo analista: os dois MCPs, as skills
+Vale para **Cursor, Codex (OpenAI), Gemini CLI, Antigravity (Google) e o agente do Copilot no VS Code**. É o mesmo analista: os dois MCPs, as skills
 e o conhecimento. O que muda é o empacotamento, porque esses agentes não têm plugin do Claude Code.
 
 ## Instalar
@@ -15,7 +15,7 @@ cd sankhya-analista && npm ci
 Em cada repositório de empresa, na pasta dele:
 
 ```bash
-node <pasta-do-plugin>/scripts/instalar.mjs --cliente cursor   # ou codex, gemini, antigravity
+node <pasta-do-plugin>/scripts/instalar.mjs --cliente cursor   # ou codex, gemini, antigravity, vscode
 ```
 
 `--conexao ACME` para quem atende várias empresas na mesma máquina (lê `ORACLE_ACME_*`), `--pasta <dir>` para
@@ -31,7 +31,7 @@ Para atualizar o plugin: `git pull && npm ci` na pasta dele e rodar o instalador
 | Arquivo | Para quê | Vai para o git? |
 |---|---|---|
 | config de MCP do cliente (tabela abaixo) | sobe `sankhya-oracle` e `sankhya-ajuda` só nesta pasta; tem o caminho do plugin nesta máquina, nunca senha | não (entra no `.gitignore`); cada pessoa roda o instalador |
-| `.agents/skills/sankhya-<nome>/` | as skills, com o nome prefixado para não colidir com outras | sim, se a equipe quiser |
+| `.agents/skills/sankhya-<nome>/` (no VS Code, `.github/skills/`) | as skills, com o nome prefixado para não colidir com outras | sim, se a equipe quiser |
 | `AGENTS.md` | decisões da empresa (do modelo) e, entre marcas, as regras gerais do analista | sim |
 | `CLAUDE.md` | só `@AGENTS.md`: Claude Code e os outros leem o mesmo arquivo | sim |
 | `.claude/settings.json` | vem do modelo: convida quem usa Claude Code a instalar o plugin ao abrir a pasta | sim |
@@ -50,6 +50,7 @@ Formatos conferidos na documentação oficial de cada um em 11/11/2026.
 | Codex | `.codex/config.toml` | `.agents/skills/` | `AGENTS.md` e o `instructions` do MCP | só vale em pasta marcada como confiável; repassa as variáveis por `env_vars` |
 | Gemini CLI | `.gemini/settings.json` | `.agents/skills/` | `AGENTS.md`, pelo `context.fileName` que o instalador configura | só vale em pasta confiável; as variáveis ficam declaradas no `env` porque o ambiente herdado pode ter `*PASSWORD*` e `*SECRET*` redigidos (a documentação se contradiz sobre o padrão) |
 | Antigravity | `.agents/mcp_config.json` | `.agents/skills/` | `AGENTS.md` | a documentação não fala de interpolação nem do diretório de início: caminho literal, e a senha só pelo ambiente herdado (no Windows o MCP lê também o registro do usuário) |
+| VS Code (Copilot) | `.mcp.json` na raiz | `.github/skills/` (não lê `.agents/skills/`) | `AGENTS.md`, sem configuração | variáveis como `${NOME:-}`; não existe `${workspaceFolder}`, então o caminho vai literal; só inicia em workspace confiável; a documentação não cita o `instructions` do MCP nem diz se o plano Free tem MCP. **O `.mcp.json` também é lido pelo Claude Code**: quem usa os dois na mesma pasta fica com dois MCPs de banco; se o arquivo já era versionado, a mudança tem caminho desta máquina e não deve ser commitada |
 
 ## O que se perde fora do Claude Code
 
@@ -68,7 +69,7 @@ Formatos conferidos na documentação oficial de cada um em 11/11/2026.
 
 Os arquivos gerados foram validados (JSON e TOML com parser), o MCP gerado sobe e lista as ferramentas num cliente
 MCP de teste, e o `pre-commit` foi exercitado num repositório git temporário (`npm run teste`). **Não foi rodado dentro
-dos quatro agentes**: nenhum está instalado na máquina de desenvolvimento. A primeira execução em cada um é o teste
+dos cinco agentes**: nenhum está instalado na máquina de desenvolvimento. A primeira execução em cada um é o teste
 final; se algo diferir da documentação, abra uma issue com o agente, a versão e a mensagem.
 
 ## Ficam de fora

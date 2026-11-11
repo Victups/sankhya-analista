@@ -97,8 +97,8 @@ extrai o dicionário e **oferece o primeiro commit**. Só o nome da empresa é p
 sem risco. Detalhes, estrutura de pastas e o que ela nunca faz em
 [docs/repositorio-da-empresa.md](docs/repositorio-da-empresa.md).
 
-> **Cursor, Codex, Gemini CLI ou Antigravity?** Sem plugin do Claude Code: `node scripts/instalar.mjs --cliente cursor`
-> (ou `codex`, `gemini`, `antigravity`) na pasta da empresa. Veja [docs/outros-agentes.md](docs/outros-agentes.md).
+> **Cursor, Codex, Gemini CLI, Antigravity ou VS Code (Copilot)?** Sem plugin do Claude Code: `node scripts/instalar.mjs
+> --cliente cursor` (ou `codex`, `gemini`, `antigravity`, `vscode`) na pasta da empresa. Veja [docs/outros-agentes.md](docs/outros-agentes.md).
 
 > **Sem acesso direto ao Oracle (Sankhya na nuvem)?** Use o API Gateway: veja [Configuração](#configuração).
 

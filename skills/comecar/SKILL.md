@@ -26,8 +26,9 @@ Se a pasta já tem `conhecimento/` e `dicionario/`, é uma reconexão: vá ao pa
      `claude plugin marketplace list --json`, entrada `sankhya-analista`), ajuste `extraKnownMarketplaces` (para um git
      qualquer: `{ "source": "git", "url": "<url>" }`). Recomende o escopo do projeto
      (`claude plugin install sankhya-analista@sankhya-analista --scope project`): o MCP do banco só roda nesta pasta.
-   - **Outros agentes (Cursor, Codex, Gemini CLI, Antigravity).** Não há plugin: o `scripts/instalar.mjs` do plugin já
-     escreveu o MCP, as skills (`.agents/skills/`) e o `AGENTS.md` nesta pasta (veja `docs/outros-agentes.md` do plugin).
+   - **Outros agentes (Cursor, Codex, Gemini CLI, Antigravity, VS Code com Copilot).** Não há plugin: o
+     `scripts/instalar.mjs` do plugin já escreveu o MCP, as skills (`.agents/skills/`, ou `.github/skills/` no VS Code) e o
+     `AGENTS.md` nesta pasta (veja `docs/outros-agentes.md` do plugin).
      Se não rodou, peça à pessoa para rodar e siga.
 
 3. **Repositório remoto privado (uma pergunta).** Se já há remoto, confirme que é privado (`gh repo view --json visibility`,
@@ -83,8 +84,8 @@ Se a pasta já tem `conhecimento/` e `dicionario/`, é uma reconexão: vá ao pa
    `dados/` e arquivos `.csv`/`.xls*` **não** aparecem (o `.gitignore` do modelo cuida disso; se aparecerem, pare e
    corrija o `.gitignore` antes). Pergunte: "Faço o primeiro commit com estes arquivos
    (e envio ao repositório remoto, se houver)?" Só com o sim:
-   `git add AGENTS.md CLAUDE.md .gitignore .claude conhecimento dicionario` (mais `.agents`, se o instalador dos outros
-   agentes criou; caminhos específicos, nunca `git add -A`), `git commit` com mensagem curta como "estrutura inicial do
+   `git add AGENTS.md CLAUDE.md .gitignore .claude conhecimento dicionario` (mais `.agents` ou `.github/skills`, se o
+   instalador dos outros agentes criou; caminhos específicos, nunca `git add -A`), `git commit` com mensagem curta como "estrutura inicial do
    analista Sankhya" e, havendo remoto, `git push -u origin HEAD`. Com o não, deixe os comandos prontos para a pessoa.
 
 9. **Resumo final.** Diga o que foi criado, o que ficou pendente (ex.: remoto, conexão de teste, usuário que grava) e o

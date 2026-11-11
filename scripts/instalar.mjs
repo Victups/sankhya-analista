@@ -1,7 +1,8 @@
 // Instala o sankhya-analista numa pasta de empresa para agentes que nao sao o Claude Code (Cursor, Codex, Gemini CLI,
-// Antigravity). Escreve o MCP no formato de cada um, copia as skills para .agents/skills/ (os quatro leem essa pasta),
-// cria o AGENTS.md com as regras e instala o pre-commit do git contra dados e segredo.
-// Uso:   node scripts/instalar.mjs --cliente cursor|codex|gemini|antigravity [--pasta <dir>] [--conexao ACME]
+// Antigravity, VS Code com Copilot). Escreve o MCP no formato de cada um, copia as skills para a pasta que ele le
+// (.agents/skills/, ou .github/skills/ no VS Code), cria o AGENTS.md com as regras e instala o pre-commit do git contra
+// dados e segredo.
+// Uso:   node scripts/instalar.mjs --cliente cursor|codex|gemini|antigravity|vscode [--pasta <dir>] [--conexao ACME]
 // Teste: node scripts/instalar.mjs --teste
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
@@ -16,17 +17,21 @@ const MARCAS_MD = ['<!-- sankhya-analista:inicio -->', '<!-- sankhya-analista:fi
 const MARCAS_TOML = ['# sankhya-analista:inicio', '# sankhya-analista:fim'];
 
 // Config de MCP por cliente: o arquivo fica so nesta maquina (caminho absoluto do plugin), por isso vai para o .gitignore.
+// skills: cada cliente le uma pasta; o VS Code (Copilot) le .github/skills e nao le .agents/skills.
 const CLIENTES = {
-  cursor: { arquivo: '.cursor/mcp.json' },
-  codex: { arquivo: '.codex/config.toml' },
-  gemini: { arquivo: '.gemini/settings.json' },
-  antigravity: { arquivo: '.agents/mcp_config.json' },
+  cursor: { arquivo: '.cursor/mcp.json', skills: '.agents/skills' },
+  codex: { arquivo: '.codex/config.toml', skills: '.agents/skills' },
+  gemini: { arquivo: '.gemini/settings.json', skills: '.agents/skills' },
+  antigravity: { arquivo: '.agents/mcp_config.json', skills: '.agents/skills' },
+  vscode: { arquivo: '.mcp.json', skills: '.github/skills' },
 };
 const PROXIMOS = {
   cursor: 'Cursor: abra a pasta e, em Settings > MCP, ligue sankhya-oracle e sankhya-ajuda.',
   codex: 'Codex: marque a pasta como confiavel (.codex/config.toml de projeto so vale em pasta confiavel) e rode "codex mcp list".',
   gemini: 'Gemini CLI: confie na pasta (.gemini/settings.json de projeto so vale em pasta confiavel) e use /mcp para ver os servidores.',
   antigravity: 'Antigravity: abra a pasta como workspace e confira os servidores MCP nas configuracoes. Ferramenta MCP pede aprovacao: nao use o modo Turbo.',
+  vscode: 'VS Code: confie no workspace (em modo restrito o MCP nao inicia) e abra o chat do Copilot em modo Agent para ver as ferramentas. '
+    + 'O .mcp.json tambem e lido pelo Claude Code: quem usa o plugin dele nesta pasta vera um segundo MCP do banco (recuse um dos dois).',
 };
 
 // Nomes das variaveis que o MCP le (mcp/oracle.mjs: config e configApi). Com --conexao ACME: ORACLE_ACME_*, SANKHYA_ACME_*.
@@ -55,7 +60,8 @@ function envOracle(cliente, { pasta, conexao }) {
   if (conexao) env.SANKHYA_CONEXAO = conexao;
   // Cursor (${env:X}) e Gemini ($X) repassam as variaveis; no Gemini o que vai declarado aqui escapa da redacao de
   // *PASSWORD*/*SECRET* do ambiente herdado. Antigravity: so o ambiente herdado (e, no Windows, o registro do usuario).
-  const ref = { cursor: n => `\${env:${n}}`, gemini: n => `$${n}` }[cliente];
+  // VS Code: ${NOME:-} (padrao vazio) para variavel indefinida; o oracle.mjs trata "${...}" que sobrar como vazio.
+  const ref = { cursor: n => `\${env:${n}}`, gemini: n => `$${n}`, vscode: n => `\${${n}:-}` }[cliente];
   if (ref) for (const n of variaveis(conexao)) env[n] = ref(n);
   return env;
 }
@@ -88,7 +94,7 @@ export function mcpDoCliente(cliente, { raiz, pasta, conexao }, existente = null
       throw new Error(`${arquivo} existe mas nao e JSON valido: corrija ou apague o arquivo e rode de novo (nao mexi nele).`);
     }
   }
-  const tipo = cliente === 'cursor' ? { type: 'stdio' } : {};
+  const tipo = cliente === 'cursor' || cliente === 'vscode' ? { type: 'stdio' } : {};
   dados.mcpServers = {
     ...dados.mcpServers,
     'sankhya-oracle': { ...tipo, command: 'node', args: [`${raiz}/mcp/oracle.mjs`], env: envOracle(cliente, { pasta, conexao }) },
@@ -108,11 +114,11 @@ export function adaptarSkill(texto, raiz, nome) {
   return texto.replaceAll('${CLAUDE_PLUGIN_ROOT}', raiz).replace(/^name:.*$/m, `name: sankhya-${nome}`);
 }
 
-function copiarSkills(raiz, pasta) {
+function copiarSkills(raiz, pasta, pastaSkills) {
   const origem = join(raiz, 'skills');
   const nomes = readdirSync(origem).filter(n => existsSync(join(origem, n, 'SKILL.md')));
   for (const n of nomes) {
-    const destino = join(pasta, '.agents', 'skills', `sankhya-${n}`);
+    const destino = join(pasta, ...pastaSkills.split('/'), `sankhya-${n}`);
     rmSync(destino, { recursive: true, force: true }); // atualizar = trocar a pasta inteira
     cpSync(join(origem, n), destino, { recursive: true });
     const f = join(destino, 'SKILL.md');
@@ -123,8 +129,8 @@ function copiarSkills(raiz, pasta) {
 
 const NOTA_REGRAS = '## Regras gerais do analista\n\n'
   + 'Bloco gerado por `scripts/instalar.mjs` do plugin sankhya-analista: não edite aqui (rode o instalador de novo para '
-  + 'atualizar). As decisões desta empresa, acima, prevalecem. Neste agente as skills ficam em `.agents/skills/` com o '
-  + 'prefixo `sankhya-` (ex.: `sankhya-comecar`).\n\n';
+  + 'atualizar). As decisões desta empresa, acima, prevalecem. Neste agente as skills ficam em `.agents/skills/` (no VS Code, '
+  + '`.github/skills/`) com o prefixo `sankhya-` (ex.: `sankhya-comecar`).\n\n';
 
 function escreverAgents(pasta, raiz, claudeSozinho) {
   const f = join(pasta, 'AGENTS.md');
@@ -182,12 +188,16 @@ export function instalar({ cliente, pasta, conexao, raiz = RAIZ }) {
   relato.push(`AGENTS.md: regras do analista no fim do arquivo${claudeSozinho ? ' (decisoes da empresa seguem no CLAUDE.md)' : ''}`);
 
   const mcpFile = join(pasta, ...CLIENTES[cliente].arquivo.split('/'));
-  const { texto } = mcpDoCliente(cliente, ctx, existsSync(mcpFile) ? readFileSync(mcpFile, 'utf8') : null);
+  const existia = existsSync(mcpFile);
+  const { texto } = mcpDoCliente(cliente, ctx, existia ? readFileSync(mcpFile, 'utf8') : null);
   mkdirSync(dirname(mcpFile), { recursive: true });
   writeFileSync(mcpFile, texto);
   relato.push(`${CLIENTES[cliente].arquivo}: MCP sankhya-oracle e sankhya-ajuda (so nesta maquina; sem senha)`);
+  // .mcp.json costuma ser compartilhado pela equipe: aqui ele passa a ter o caminho desta maquina
+  if (cliente === 'vscode' && existia) relato.push('ATENCAO: o .mcp.json ja existia (mesclei sem apagar nada) e agora tem o caminho desta maquina: nao commite essa mudanca');
 
-  relato.push(`.agents/skills/: ${copiarSkills(raiz, pasta).length} skills (sankhya-<nome>)`);
+  const { skills } = CLIENTES[cliente];
+  relato.push(`${skills}/: ${copiarSkills(raiz, pasta, skills).length} skills (sankhya-<nome>)`);
 
   const ignorar = garantirLinhas(join(pasta, '.gitignore'),
     ['dados/', 'Result_*.json', '.env', '.env.*', '!.env.example', CLIENTES[cliente].arquivo]);
@@ -199,7 +209,7 @@ export function instalar({ cliente, pasta, conexao, raiz = RAIZ }) {
 }
 
 function uso() {
-  console.log('Uso: node scripts/instalar.mjs --cliente cursor|codex|gemini|antigravity [--pasta <dir>] [--conexao ACME]\n'
+  console.log('Uso: node scripts/instalar.mjs --cliente cursor|codex|gemini|antigravity|vscode [--pasta <dir>] [--conexao ACME]\n'
     + 'Rode na pasta (ou informe --pasta) do repositorio da empresa.');
 }
 
@@ -236,6 +246,13 @@ async function testes() {
   assert.equal(ac.SANKHYA_CONEXAO, 'ACME');
   assert.equal(ac.ORACLE_ACME_PASSWORD, '${env:ORACLE_ACME_PASSWORD}');
   assert.equal(ac.ORACLE_PASSWORD, undefined);
+  // VS Code (Copilot): .mcp.json com ${NOME:-}, sem ${workspaceFolder}; o que ja havia no arquivo fica
+  const vs = json('vscode', ctx, JSON.stringify({ mcpServers: { outro: { command: 'y' } } })).mcpServers;
+  assert.ok(vs.outro);
+  assert.equal(vs['sankhya-oracle'].type, 'stdio');
+  assert.equal(vs['sankhya-oracle'].env.ORACLE_PASSWORD, '${ORACLE_PASSWORD:-}');
+  assert.equal(vs['sankhya-oracle'].env.SANKHYA_PROJETO, 'C:/emp/acme');
+  assert.ok(!JSON.stringify(vs).includes('workspaceFolder'));
   // arquivo existente invalido nao e sobrescrito
   assert.throws(() => mcpDoCliente('cursor', ctx, '{ quebrado'), /nao e JSON valido/);
   assert.equal(comBloco('a\n', 'x', ['<', '>']), 'a\n\n<\nx\n>\n');
@@ -304,6 +321,18 @@ async function testes() {
     assert.ok(!ag2.includes('<EMPRESA>'));
     assert.match(readFileSync(join(velha, '.gitignore'), 'utf8'), /^node_modules\/\n\n# sankhya-analista\n.*dados\/[\s\S]*\.cursor\/mcp\.json/);
     assert.equal(JSON.parse(readFileSync(join(velha, '.cursor', 'mcp.json'), 'utf8')).mcpServers['sankhya-oracle'].type, 'stdio');
+
+    // 4) VS Code: .mcp.json que ja existe e mesclado (e avisado), skills em .github/skills e nada em .agents
+    const vsc = join(tmp, 'vsc');
+    mkdirSync(vsc);
+    writeFileSync(join(vsc, '.mcp.json'), JSON.stringify({ mcpServers: { outro: { command: 'y' } } }));
+    const relatoVs = instalar({ cliente: 'vscode', pasta: vsc });
+    const mcpVs = JSON.parse(readFileSync(join(vsc, '.mcp.json'), 'utf8')).mcpServers;
+    assert.ok(mcpVs.outro && mcpVs['sankhya-oracle']);
+    assert.ok(relatoVs.some(l => l.includes('.mcp.json ja existia')));
+    assert.ok(existsSync(join(vsc, '.github', 'skills', 'sankhya-comecar', 'SKILL.md')));
+    assert.ok(!existsSync(join(vsc, '.agents')));
+    assert.match(readFileSync(join(vsc, '.gitignore'), 'utf8'), /^\.mcp\.json$/m);
   } finally {
     rmSync(tmp, { recursive: true, force: true });
   }
